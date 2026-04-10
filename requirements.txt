@@ -58,6 +58,7 @@ PyMuPDF==1.27.2.2
 pypdf==6.9.2
 PyPika==0.51.1
 pyproject_hooks==1.2.0
+pythainlp==5.3.4
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
 PyYAML==6.0.3

@@ -3,6 +3,7 @@ import re
 
 from chromadb import HttpClient
 from ollama import Client
+from pythainlp.tokenize import word_tokenize
 
 # -------- CONFIGURATION --------
 OLLAMA_MODEL = "bge-m3"
@@ -20,7 +21,23 @@ def normalize_text(text):
 
 
 def extract_query_terms(query_text):
-    return [term for term in re.split(r"[^0-9a-zA-Zก-๙]+", normalize_text(query_text)) if len(term) > 1]
+    return tokenize_terms(query_text)
+
+
+def tokenize_terms(text):
+    text = normalize_text(text)
+    if not text:
+        return []
+
+    # Keep Thai-aware segmentation and also support latin/number terms.
+    tokens = word_tokenize(text, keep_whitespace=False)
+    cleaned = []
+    for token in tokens:
+        token = re.sub(r"[^0-9a-zA-Zก-๙]", "", token)
+        if len(token) > 1:
+            cleaned.append(token)
+
+    return cleaned
 
 
 def extract_character_ngrams(text, n=4):
@@ -44,8 +61,10 @@ def lexical_score(query_text, document_text):
 
     query_terms = extract_query_terms(query_text)
     if query_terms:
-        matched_terms = sum(1 for term in query_terms if term in document_norm)
-        score += matched_terms / len(query_terms)
+        document_terms = set(tokenize_terms(document_text))
+        if document_terms:
+            matched_terms = sum(1 for term in query_terms if term in document_terms)
+            score += matched_terms / len(query_terms)
 
     query_ngrams = extract_character_ngrams(query_text)
     if query_ngrams:
