@@ -7,8 +7,8 @@ This project ingests PDF files into a ChromaDB collection and lets you search th
 - `ingest.py` reads all PDF files from `./2568-2569/`
 - Each PDF is split into smaller text chunks
 - The chunks are embedded with Ollama using `bge-m3`
-- The embeddings are stored in ChromaDB under the collection `multi_pdf_vectors`
-- `search.py` lets you type a query and retrieve the most similar chunks
+- The embeddings are stored in ChromaDB under the collection `multi_pdf_vectors` using cosine similarity
+- `search.py` lets you type a query and retrieve the most similar chunks, then reranks the strongest candidates with a lexical boost
 
 ## Requirements
 
@@ -69,8 +69,8 @@ python ingest.py
 Important behavior:
 
 - The script deletes the existing `multi_pdf_vectors` collection before ingesting new data
-- PDFs are split into chunks of about 1000 characters with 200 characters of overlap
-- Each chunk stores the source filename and page number as metadata
+- PDFs are split into chunks of about 800 characters with 120 characters of overlap
+- Each chunk stores the source filename, page number, and chunk number as metadata
 
 ## Search Documents
 
@@ -101,6 +101,7 @@ Type `exit` or `quit` to close the search loop.
 - If ingestion fails, confirm that Ollama is running and `bge-m3` is installed
 - If search says the collection is missing, run `ingest.py` first
 - If Docker is not reachable, verify that the ChromaDB container is up on port `8000`
+- If results still feel noisy, try a more specific query or increase the number of candidate results in `search.py`
 
 ## Notes
 
